@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-Installable bundle for session cost: mounts the [dsh-session-cost](../../session/session-cost/README.md) ledger service and the [dsh-client-ui-session-cost](../../client/ui-session-cost/README.md) surfaces over any dsh profile whose base already provides storage, session persistence, and session-query (dsh-base does).
+Installable bundle for session cost: mounts the [dsh-session-cost](../session-cost/README.md) ledger service and the [dsh-client-ui-session-cost](../ui-session-cost/README.md) surfaces over any dsh profile whose base already provides storage, session persistence, and session-query (dsh-base does).
 
 ## Install
 

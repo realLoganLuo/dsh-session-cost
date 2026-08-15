@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-会话成本核算，node 半：版本化费率卡引擎、每会话 `costStats` 投影，以及 `cost` Remote 命名空间背后的持久化账本。界面（dock 成本条、成本视图标签页、用量看板）位于 [@deepseek-ai/dsh-client-ui-session-cost](../../client/ui-session-cost/README.md)。
+会话成本核算，node 半：版本化费率卡引擎、每会话 `costStats` 投影，以及 `cost` Remote 命名空间背后的持久化账本。界面（dock 成本条、成本视图标签页、用量看板）位于 [@deepseek-ai/dsh-client-ui-session-cost](../ui-session-cost/README.md)。
 
 ## 已交付的界面
 

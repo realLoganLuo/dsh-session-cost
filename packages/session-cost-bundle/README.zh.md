@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-会话成本可安装组合包：在任何 base 已提供存储、会话持久化与 session-query 的 dsh profile 之上，挂载 [dsh-session-cost](../../session/session-cost/README.md) 账本服务与 [dsh-client-ui-session-cost](../../client/ui-session-cost/README.md) 界面（dsh-base 即满足）。
+会话成本可安装组合包：在任何 base 已提供存储、会话持久化与 session-query 的 dsh profile 之上，挂载 [dsh-session-cost](../session-cost/README.md) 账本服务与 [dsh-client-ui-session-cost](../ui-session-cost/README.md) 界面（dsh-base 即满足）。
 
 ## 安装
 

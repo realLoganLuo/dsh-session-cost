@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-会话成本界面，浏览器半：dock 成本条、每会话成本视图标签页，以及用量看板。计价、投影与账本位于 [@deepseek-ai/dsh-session-cost](../../session/session-cost/README.md)。
+会话成本界面，浏览器半：dock 成本条、每会话成本视图标签页，以及用量看板。计价、投影与账本位于 [@deepseek-ai/dsh-session-cost](../session-cost/README.md)。
 
 ## 已交付的界面
 
