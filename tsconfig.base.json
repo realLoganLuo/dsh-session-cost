@@ -30,9 +30,6 @@
       "@deepseek-ai/dsh-typert-protocol/types": [
         "./packages/typert-protocol/src/types.ts"
       ],
-      "@deepseek-ai/dsh-typert-protocol/invariant": [
-        "./packages/typert-protocol/src/invariant.ts"
-      ],
       "@deepseek-ai/dsh-session-cost": [
         "./packages/session-cost/src/index.ts"
       ],
