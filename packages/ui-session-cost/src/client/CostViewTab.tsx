@@ -6,7 +6,7 @@ import { Fragment, memo, useMemo } from 'react'
 import type { UseProjection } from '@deepseek-ai/dsh-client-runtime/client'
 import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: merges the costStats key into SessionProjectionMap for useProjection.
-import type {} from '@deepseek-ai/dsh-session-cost/types'
+import type {} from '@logan-luo/dsh-session-cost/types'
 import type { CostKey } from './locales.ts'
 import { formatCompact, formatYuan, modelLabel, versionLabel } from './labels.ts'
 import css from './CostViewTab.module.css'

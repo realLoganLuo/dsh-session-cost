@@ -1,9 +1,9 @@
 /** Client-side label helpers: pure functions over cost/pricing vocabulary. */
 
 import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
-import { formatYuan } from '@deepseek-ai/dsh-session-cost/src/pricing.ts'
-import type { DeepSeekPricingModel, PricedSelection } from '@deepseek-ai/dsh-session-cost/src/pricing.ts'
-import type { ModelCostBucket } from '@deepseek-ai/dsh-session-cost/types'
+import { formatYuan } from '@logan-luo/dsh-session-cost/src/pricing.ts'
+import type { DeepSeekPricingModel, PricedSelection } from '@logan-luo/dsh-session-cost/src/pricing.ts'
+import type { ModelCostBucket } from '@logan-luo/dsh-session-cost/types'
 import type { CostKey } from './locales.ts'
 
 /** Compact token count, mirroring the stats strip: 517 / 12.2K / 517K / 1.2M. */

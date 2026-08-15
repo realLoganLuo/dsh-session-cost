@@ -6,7 +6,7 @@ import { memo, useEffect, useState } from 'react'
 import { Dashboard } from './Dashboard.tsx'
 import type { DashboardRange } from './controller.ts'
 import type { CostDashboardTriggerProps } from './slots.ts'
-import type { RollupGroupBy } from '@deepseek-ai/dsh-session-cost/types'
+import type { RollupGroupBy } from '@logan-luo/dsh-session-cost/types'
 import css from './DashboardTrigger.module.css'
 
 const RANGES: readonly DashboardRange[] = ['today', 'week', 'month', 'all']

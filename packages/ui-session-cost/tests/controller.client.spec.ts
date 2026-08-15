@@ -2,7 +2,7 @@
 
 import { describe, expect, it, vi } from 'vitest'
 import { DashboardController, rangeOf, type CostDashboardRemote, type DashboardRange } from '../src/client/controller.ts'
-import type { CostDashboardValue } from '@deepseek-ai/dsh-session-cost/types'
+import type { CostDashboardValue } from '@logan-luo/dsh-session-cost/types'
 
 const VALUE: CostDashboardValue = {
   pricedRequests: 1,

@@ -8,8 +8,8 @@
 
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
 import type { HostObservable } from '@deepseek-ai/dsh-client-ui-slots'
-import { DEEPSEEK_BEIJING_OFFSET_MINUTES, dayKeyOf, monthKeyOf, weekKeyOf } from '@deepseek-ai/dsh-session-cost/src/pricing.ts'
-import type { CostDashboardValue, RollupGroupBy } from '@deepseek-ai/dsh-session-cost/types'
+import { DEEPSEEK_BEIJING_OFFSET_MINUTES, dayKeyOf, monthKeyOf, weekKeyOf } from '@logan-luo/dsh-session-cost/src/pricing.ts'
+import type { CostDashboardValue, RollupGroupBy } from '@logan-luo/dsh-session-cost/types'
 
 /** The one Remote call this controller needs. */
 export interface CostDashboardRemote {

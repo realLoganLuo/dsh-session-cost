@@ -1,10 +1,10 @@
-/** Package invariant companion for `@deepseek-ai/dsh-session-cost`. */
+/** Package invariant companion for `@logan-luo/dsh-session-cost`. */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-session-cost'
+const PACKAGE_NAME = '@logan-luo/dsh-session-cost'
 
 export const name = 'session-cost-invariant'
 export const inject = ['invariants']

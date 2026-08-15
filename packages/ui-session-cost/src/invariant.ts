@@ -1,10 +1,10 @@
-/** Package-owned invariant companion for `@deepseek-ai/dsh-client-ui-session-cost`. */
+/** Package-owned invariant companion for `@logan-luo/dsh-client-ui-session-cost`. */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-client-ui-session-cost'
+const PACKAGE_NAME = '@logan-luo/dsh-client-ui-session-cost'
 
 /** Cordis companion plugin name. */
 export const name = 'client-ui-session-cost-invariant'

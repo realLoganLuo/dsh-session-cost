@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-session-cost-bundle",
+  "name": "@logan-luo/dsh-session-cost-bundle",
   "description": "Installable bundle for session cost: the ledger service and the cost surfaces over any dsh profile",
   "version": "0.1.0-rc.6",
   "publishConfig": {
@@ -38,8 +38,8 @@
     "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.5 <0.2.0-0"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-client-ui-session-cost": "workspace:^",
-    "@deepseek-ai/dsh-session-cost": "workspace:^"
+    "@logan-luo/dsh-client-ui-session-cost": "workspace:^",
+    "@logan-luo/dsh-session-cost": "workspace:^"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": ">=4.0.1-rc.0 <5.0.0-0",

@@ -6,7 +6,7 @@ import { render } from '@testing-library/react'
 import type { UseProjection } from '@deepseek-ai/dsh-client-runtime/client'
 import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
 import { CostDockRow } from '../src/client/CostDockRow.tsx'
-import type { SessionCostProjection } from '@deepseek-ai/dsh-session-cost/types'
+import type { SessionCostProjection } from '@logan-luo/dsh-session-cost/types'
 import type { CostKey } from '../src/client/locales.ts'
 import { en } from '../src/client/locales.ts'
 

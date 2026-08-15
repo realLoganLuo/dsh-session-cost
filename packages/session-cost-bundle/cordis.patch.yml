@@ -3,7 +3,7 @@
 # storage, session persistence, and session-query (dsh-base does).
 - insert:
     - id: session-cost
-      name: '@deepseek-ai/dsh-session-cost'
+      name: '@logan-luo/dsh-session-cost'
 
     - id: ui-session-cost
-      name: '@deepseek-ai/dsh-client-ui-session-cost'
+      name: '@logan-luo/dsh-client-ui-session-cost'

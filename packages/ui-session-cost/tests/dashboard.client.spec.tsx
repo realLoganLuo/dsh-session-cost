@@ -6,7 +6,7 @@ import { render } from '@testing-library/react'
 import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
 import { Dashboard, groupLabel } from '../src/client/Dashboard.tsx'
 import { formatCompact } from '../src/client/labels.ts'
-import type { CostDashboardValue } from '@deepseek-ai/dsh-session-cost/types'
+import type { CostDashboardValue } from '@logan-luo/dsh-session-cost/types'
 import type { CostKey } from '../src/client/locales.ts'
 import { en } from '../src/client/locales.ts'
 

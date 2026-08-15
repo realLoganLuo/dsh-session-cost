@@ -1,4 +1,4 @@
-# @deepseek-ai/dsh-session-cost-bundle
+# @logan-luo/dsh-session-cost-bundle
 
 [English](README.md) | 中文
 
@@ -7,7 +7,7 @@
 ## 安装
 
 ```sh
-dsh plugin --profile <name> add @deepseek-ai/dsh-session-cost-bundle
+dsh plugin --profile <name> add @logan-luo/dsh-session-cost-bundle
 ```
 
 该组合包的 patch 插入两行：`session-cost`（node 服务）与 `ui-session-cost`（浏览器界面）。随附的 web profile 已组合这两行，因此**不要**在基于 web-app 的 profile 上安装本组合包：重复的 id 会让 Loader 拒绝组合后的配置。请安装到未挂载这些行的 profile（headless 或自定义 profile）以启用该功能。

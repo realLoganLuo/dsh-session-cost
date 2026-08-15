@@ -8,7 +8,7 @@ import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
 import { DashboardController, type CostDashboardRemote } from '../src/client/controller.ts'
 import { DashboardTrigger } from '../src/client/DashboardTrigger.tsx'
 import type { CostDashboardTriggerProps } from '../src/client/slots.ts'
-import type { CostDashboardValue } from '@deepseek-ai/dsh-session-cost/types'
+import type { CostDashboardValue } from '@logan-luo/dsh-session-cost/types'
 import type { CostKey } from '../src/client/locales.ts'
 import { en } from '../src/client/locales.ts'
 

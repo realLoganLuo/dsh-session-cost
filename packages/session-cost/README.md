@@ -1,8 +1,8 @@
-# @deepseek-ai/dsh-session-cost
+# @logan-luo/dsh-session-cost
 
 English | [中文](README.zh.md)
 
-Session cost accounting, node half: a versioned rate-card engine, the per-session `costStats` projection, and the durable ledger behind the `cost` Remote namespace. The surfaces (dock cost strip, cost view tab, usage dashboard) live in [@deepseek-ai/dsh-client-ui-session-cost](../ui-session-cost/README.md).
+Session cost accounting, node half: a versioned rate-card engine, the per-session `costStats` projection, and the durable ledger behind the `cost` Remote namespace. The surfaces (dock cost strip, cost view tab, usage dashboard) live in [@logan-luo/dsh-client-ui-session-cost](../ui-session-cost/README.md).
 
 ## Shipped surfaces
 

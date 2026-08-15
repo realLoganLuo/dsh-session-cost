@@ -12,7 +12,7 @@
  * event's turn/step matches the open step (peak windows are calendarized by
  * request start), falling back to the message time.
  *
- * @module @deepseek-ai/dsh-session-cost/projection
+ * @module @logan-luo/dsh-session-cost/projection
  */
 
 import { z } from 'zod'

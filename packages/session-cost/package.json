@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-session-cost",
+  "name": "@logan-luo/dsh-session-cost",
   "description": "Per-request session cost accounting: versioned rate-card engine, costStats projection, and the durable ledger behind the cost Remote",
   "version": "0.1.0-rc.6",
   "publishConfig": {

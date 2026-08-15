@@ -1,5 +1,5 @@
 {
-  "name": "@deepseek-ai/dsh-client-ui-session-cost",
+  "name": "@logan-luo/dsh-client-ui-session-cost",
   "description": "Session-cost surfaces: dock cost strip, cost view tab, and the usage dashboard over the cost Remote",
   "version": "0.1.0-rc.6",
   "publishConfig": {
@@ -48,7 +48,7 @@
     "@deepseek-ai/dsh-client-ui-sidebar": ">=0.1.0-rc.5 <0.2.0-0",
     "@deepseek-ai/dsh-client-ui-slots": ">=0.1.0-rc.5 <0.2.0-0",
     "@deepseek-ai/dsh-api-remotes": ">=0.1.0-rc.5 <0.2.0-0",
-    "@deepseek-ai/dsh-session-cost": "workspace:^",
+    "@logan-luo/dsh-session-cost": "workspace:^",
     "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.5 <0.2.0-0",
     "@deepseek-ai/cordis": ">=4.0.1-rc.0 <5.0.0-0",
     "react": "^18.2.0"
@@ -61,7 +61,7 @@
     "@deepseek-ai/dsh-client-ui-sidebar": ">=0.1.0-rc.5 <0.2.0-0",
     "@deepseek-ai/dsh-client-ui-slots": ">=0.1.0-rc.5 <0.2.0-0",
     "@deepseek-ai/dsh-api-remotes": ">=0.1.0-rc.5 <0.2.0-0",
-    "@deepseek-ai/dsh-session-cost": "workspace:^",
+    "@logan-luo/dsh-session-cost": "workspace:^",
     "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.5 <0.2.0-0",
     "@types/react": "~18.3.1",
     "typescript": "^5.5.0",

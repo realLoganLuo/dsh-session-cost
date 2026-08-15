@@ -15,8 +15,8 @@ import { createMessage } from '@deepseek-ai/dsh-llm'
 import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
 import type { Session, SessionEvent } from '@deepseek-ai/dsh-session'
 import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import { sessionCostProjectionDefinition } from '@deepseek-ai/dsh-session-cost/src/projection.ts'
-import type { SessionCostProjection } from '@deepseek-ai/dsh-session-cost/types'
+import { sessionCostProjectionDefinition } from '@logan-luo/dsh-session-cost/src/projection.ts'
+import type { SessionCostProjection } from '@logan-luo/dsh-session-cost/types'
 
 async function harness(withUnit: boolean): Promise<{
   ctx: Context

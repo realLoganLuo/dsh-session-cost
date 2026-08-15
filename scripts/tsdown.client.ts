@@ -25,7 +25,7 @@ const PLATFORM_MODULES = [
 ] as const
 
 /** Wire/type layers a client bundle may inline: browser-safe contracts with no runtime identity to share. */
-export const INLINE_SAFE = /^@deepseek-ai\/dsh-(host-apiproxy|session|llm|tools|brand|session-cost)(\/|$)/
+export const INLINE_SAFE = /^@(?:deepseek-ai|logan-luo)\/dsh-(host-apiproxy|session|llm|tools|brand|session-cost)(\/|$)/
 
 /** Vendored framework libraries: rescoped into @deepseek-ai, ordinary libraries a browser bundle inlines. */
 const VENDORED_LIBRARY = /^@deepseek-ai\/(cosmokit|schemastery)(\/|$)/

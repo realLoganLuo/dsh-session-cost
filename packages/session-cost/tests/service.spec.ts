@@ -18,8 +18,8 @@ import * as StorageDomain from '@deepseek-ai/dsh-storage-domain'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import SessionCostService from '@deepseek-ai/dsh-session-cost'
-import type { CostDashboardValue } from '@deepseek-ai/dsh-session-cost/types'
+import SessionCostService from '@logan-luo/dsh-session-cost'
+import type { CostDashboardValue } from '@logan-luo/dsh-session-cost/types'
 
 /** Beijing 2026-08-17 10:00 == 02:00Z: inside the official peak window. */
 const PEAK_INSTANT = Date.parse('2026-08-17T02:00:00Z')

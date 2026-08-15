@@ -9,7 +9,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 // The generated cost Remote contribution, mounted by this plugin (third-party
 // remotes self-mount; the first-party api-remotes assembly does not carry them).
-import TYPERT_REMOTE from '@deepseek-ai/dsh-session-cost/remote'
+import TYPERT_REMOTE from '@logan-luo/dsh-session-cost/remote'
 import { CostDockRow } from './CostDockRow.tsx'
 import { CostViewTab } from './CostViewTab.tsx'
 import { DashboardController } from './controller.ts'

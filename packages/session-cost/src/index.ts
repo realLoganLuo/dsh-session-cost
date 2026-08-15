@@ -2,7 +2,7 @@
 // durable ledger service behind the `cost` Remote namespace. The browser half
 // renders the projection through the standard feed and calls `cost.dashboard`
 // for cross-session rollups.
-// @module @deepseek-ai/dsh-session-cost
+// @module @logan-luo/dsh-session-cost
 
 import { Context, Service } from '@deepseek-ai/cordis'
 import s from '@deepseek-ai/schemastery'

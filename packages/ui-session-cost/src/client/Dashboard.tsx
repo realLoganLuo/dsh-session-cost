@@ -4,7 +4,7 @@
 
 import { memo, useMemo } from 'react'
 import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
-import type { CostDashboardValue, RollupGroupBy } from '@deepseek-ai/dsh-session-cost/types'
+import type { CostDashboardValue, RollupGroupBy } from '@logan-luo/dsh-session-cost/types'
 import type { CostKey } from './locales.ts'
 import { formatCompact, formatYuan, modelLabel } from './labels.ts'
 import css from './Dashboard.module.css'

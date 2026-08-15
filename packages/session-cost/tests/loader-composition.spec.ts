@@ -23,7 +23,7 @@ import SessionQuerySqlite from '@deepseek-ai/dsh-session-query-sqlite'
 import Storage from '@deepseek-ai/dsh-storage'
 import * as StorageDomain from '@deepseek-ai/dsh-storage-domain'
 import * as StorageJson from '@deepseek-ai/dsh-storage-json'
-import SessionCostService from '@deepseek-ai/dsh-session-cost'
+import SessionCostService from '@logan-luo/dsh-session-cost'
 
 let root: string | undefined
 let context: Context | undefined
@@ -54,7 +54,7 @@ async function loadComposition(): Promise<{ ctx: Context; session: Session }> {
     '- id: session-query',
     '  name: \'@deepseek-ai/dsh-session-query-sqlite\'',
     '  config: { path: \':memory:\' }',
-    '- name: \'@deepseek-ai/dsh-session-cost\'',
+    '- name: \'@logan-luo/dsh-session-cost\'',
     '',
   ].join('\n'))
 
@@ -70,7 +70,7 @@ async function loadComposition(): Promise<{ ctx: Context; session: Session }> {
     ['@deepseek-ai/dsh-storage-json', StorageJson],
     ['@deepseek-ai/dsh-storage-domain', StorageDomain],
     ['@deepseek-ai/dsh-session-query-sqlite', SessionQuerySqlite],
-    ['@deepseek-ai/dsh-session-cost', SessionCostService],
+    ['@logan-luo/dsh-session-cost', SessionCostService],
   ])
   context.loader.internal = {
     version: 'v2',

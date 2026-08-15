@@ -1,8 +1,8 @@
-# @deepseek-ai/dsh-client-ui-session-cost
+# @logan-luo/dsh-client-ui-session-cost
 
 English | [中文](README.zh.md)
 
-Session cost surfaces, browser half: the dock cost strip, the per-session cost view tab, and the usage dashboard. The pricing, projection, and ledger live in [@deepseek-ai/dsh-session-cost](../session-cost/README.md).
+Session cost surfaces, browser half: the dock cost strip, the per-session cost view tab, and the usage dashboard. The pricing, projection, and ledger live in [@logan-luo/dsh-session-cost](../session-cost/README.md).
 
 ## Shipped surfaces
 

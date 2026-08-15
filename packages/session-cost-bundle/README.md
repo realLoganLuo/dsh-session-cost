@@ -1,4 +1,4 @@
-# @deepseek-ai/dsh-session-cost-bundle
+# @logan-luo/dsh-session-cost-bundle
 
 English | [中文](README.zh.md)
 
@@ -7,7 +7,7 @@ Installable bundle for session cost: mounts the [dsh-session-cost](../session-co
 ## Install
 
 ```sh
-dsh plugin --profile <name> add @deepseek-ai/dsh-session-cost-bundle
+dsh plugin --profile <name> add @logan-luo/dsh-session-cost-bundle
 ```
 
 The bundle's patch inserts two rows: `session-cost` (the node service) and `ui-session-cost` (the browser surfaces). The shipped web profile already composes these rows, so **do not install the bundle over a web-app-based profile**: the duplicate ids make the Loader reject the composed config. Install it into a profile that does not already mount the rows (a headless or custom profile) to enable the feature.

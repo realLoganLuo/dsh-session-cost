@@ -1,7 +1,7 @@
 /**
  * Durable storage-domain declaration for the session-cost ledger: the
  * per-request rows table and the per-session scan-watermark table.
- * @module @deepseek-ai/dsh-session-cost/src/spec
+ * @module @logan-luo/dsh-session-cost/src/spec
  */
 
 import { z } from 'zod'

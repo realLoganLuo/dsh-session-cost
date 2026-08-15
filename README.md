@@ -6,14 +6,14 @@ Three packages, one installable bundle:
 
 | Package | Face | Role |
 | --- | --- | --- |
-| [`@deepseek-ai/dsh-session-cost`](packages/session-cost) | node | Rate-card pricing, `costStats` session projection, `cost` ledger + dashboard Remote |
-| [`@deepseek-ai/dsh-client-ui-session-cost`](packages/ui-session-cost) | browser | Dock strip, cost view tab, dashboard trigger + panel |
-| [`@deepseek-ai/dsh-session-cost-bundle`](packages/session-cost-bundle) | — | dsh profile patch that mounts the other two |
+| [`@logan-luo/dsh-session-cost`](packages/session-cost) | node | Rate-card pricing, `costStats` session projection, `cost` ledger + dashboard Remote |
+| [`@logan-luo/dsh-client-ui-session-cost`](packages/ui-session-cost) | browser | Dock strip, cost view tab, dashboard trigger + panel |
+| [`@logan-luo/dsh-session-cost-bundle`](packages/session-cost-bundle) | — | dsh profile patch that mounts the other two |
 
 ## Install
 
 ```sh
-dsh plugin --profile <name> add @deepseek-ai/dsh-session-cost-bundle
+dsh plugin --profile <name> add @logan-luo/dsh-session-cost-bundle
 ```
 
 The bundle targets profiles that do not already mount the rows (a headless or custom profile). The shipped web-app-based profile already composes `session-cost` and `ui-session-cost`, so installing the bundle over it duplicates the rows and the Loader rejects the composed config.
