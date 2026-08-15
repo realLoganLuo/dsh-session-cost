@@ -76,7 +76,6 @@ export function clientBundle(
     const client = clientConfig(id, face === undefined ? 'src/client/index.ts' : 'lib/types/client/index.js')
     const node = [lib]
     if (face === 'host') return [SKIP_WORKSPACE_BUILD]
-    if (face === 'client') return [client]
     return [...node, client]
   }
 }
