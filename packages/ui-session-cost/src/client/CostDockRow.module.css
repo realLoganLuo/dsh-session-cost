@@ -1,0 +1,18 @@
+/* Cost strip: second dock row under the built-in stats line, 12/20 tertiary
+   text aligned to the shared message column axis. */
+
+.root {
+  display: block;
+  text-align: center;
+  max-width: var(--dsh-chat-content-width);
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0 calc(var(--dsh-composer-side-clearance) + 16px) 4px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

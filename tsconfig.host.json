@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./packages/typert-protocol" },
+    { "path": "./packages/session-cost" },
+    { "path": "./packages/session-cost-bundle" }
+  ]
+}

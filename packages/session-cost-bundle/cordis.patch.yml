@@ -1,0 +1,9 @@
+# The dsh-session-cost bundle: mounts the session-cost ledger service and the
+# ui-session-cost surfaces. Applied over a profile whose base already provides
+# storage, session persistence, and session-query (dsh-base does).
+- insert:
+    - id: session-cost
+      name: '@deepseek-ai/dsh-session-cost'
+
+    - id: ui-session-cost
+      name: '@deepseek-ai/dsh-client-ui-session-cost'

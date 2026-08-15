@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.base.client.json",
+  "files": [],
+  "references": [
+    { "path": "./packages/ui-session-cost" }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@deepseek-ai/dsh-typert-protocol",
+  "description": "Vendored Typert Remote metadata and provider protocols (source copy for analysis)",
+  "version": "0.1.0-rc.6",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./types": {
+      "types": "./lib/types/types.d.ts",
+      "default": "./lib/types/types.js"
+    },
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.1-rc.0 <5.0.0-0"
+  }
+}

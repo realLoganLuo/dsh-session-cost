@@ -1,0 +1,34 @@
+{
+  "name": "dsh-session-cost",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:lib",
+    "build:lib": "npm run build:lib:host && npm run build:lib:client",
+    "build:lib:host": "tsc -b tsconfig.host.json && tsdown --env.DSH_BUILD_FACE host",
+    "build:lib:client": "tsc -b tsconfig.client.json && tsdown --env.DSH_BUILD_FACE client",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint packages scripts"
+  },
+  "devDependencies": {
+    "@deepseek-ai/dsh-typert-generator": ">=0.1.0-rc.6 <0.2.0-0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/dom": "^10.4.1",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.7",
+    "js-yaml": "^4.1.0",
+    "jsdom": "^26.1.0",
+    "oxlint": "^1.76.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsdown": "0.22.2",
+    "typescript": "^6.0.3",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4",
+    "@types/node": "^22.20.0",
+    "lightningcss": "^1.29.2"
+  },
+  "packageManager": "pnpm@10.30.2"
+}
