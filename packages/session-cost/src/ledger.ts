@@ -220,7 +220,10 @@ export async function reconcileLedger(
     stats.scanned += 1
   }
   // Bounded read concurrency: the sessionQuery backend itself limits persisted
-  // inspection; this pool mirrors that posture for the fold.
+  // inspection; this pool mirrors that posture for the fold. All workers must
+  // settle before the pass returns — a fast `Promise.all` rejection would
+  // release the service's in-flight lock while sibling workers are still
+  // scanning, letting a later tick overlap this pass.
   let cursor = 0
   const workers = Array.from({ length: RECONCILE_READ_CONCURRENCY }, async () => {
     while (cursor < records.length) {
@@ -230,7 +233,11 @@ export async function reconcileLedger(
       if (record !== undefined) await scanOne(record)
     }
   })
-  await Promise.all(workers)
+  const settled = await Promise.allSettled(workers)
+  /* v8 ignore next 5 -- unreachable: scanOne contains its read failures, and write failures only surface under teardown races */
+  for (const result of settled) {
+    if (result.status === 'rejected') throw result.reason
+  }
   for (const key of tables.rows.keys()) {
     if (!alive.has(sessionIdOf(key))) {
       await tables.rows.delete(key)

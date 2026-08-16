@@ -1,19 +1,21 @@
 /**
- * REAL-composition proof: the shipped YAML shape (session store + JSONL
+ * REAL-composition proof: the shipped YAML shape (timer + session store + JSONL
  * persistence + projection registry + storage hub/domain + session-query +
  * session-cost service) boots through the vendored Loader; a logged usage-
- * bearing request lands in the costStats projection, and the `cost.dashboard`
- * Remote reconciles the persisted corpus into the same rollup.
+ * bearing request lands in the costStats projection, and the background
+ * reconcile (one tick per `reconcileIntervalMs`) folds the persisted corpus
+ * into the `cost.dashboard` rollup.
  */
 
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
+import Timer from '@deepseek-ai/cordis-plugin-timer'
 import { createMessage } from '@deepseek-ai/dsh-llm'
 import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
 import type { Session } from '@deepseek-ai/dsh-session'
@@ -39,6 +41,8 @@ async function loadComposition(): Promise<{ ctx: Context; session: Session }> {
   root = await mkdtemp(join(tmpdir(), 'dsh-session-cost-loader-'))
   const configPath = join(root, 'cordis.yml')
   await writeFile(configPath, [
+    '- id: timer',
+    "  name: '@deepseek-ai/cordis-plugin-timer'",
     '- name: \'@deepseek-ai/dsh-session\'',
     '- id: session-persistence',
     '  name: \'@deepseek-ai/dsh-session-persistence-jsonl\'',
@@ -54,7 +58,9 @@ async function loadComposition(): Promise<{ ctx: Context; session: Session }> {
     '- id: session-query',
     '  name: \'@deepseek-ai/dsh-session-query-sqlite\'',
     '  config: { path: \':memory:\' }',
-    '- name: \'@logan-luo/dsh-session-cost\'',
+    '- id: session-cost',
+    '  name: \'@logan-luo/dsh-session-cost\'',
+    '  config: { reconcileIntervalMs: 1000 }',
     '',
   ].join('\n'))
 
@@ -63,6 +69,7 @@ async function loadComposition(): Promise<{ ctx: Context; session: Session }> {
   await context.plugin(Loader)
   context.loader.builtins.include = Include
   const modules = new Map<string, unknown>([
+    ['@deepseek-ai/cordis-plugin-timer', Timer],
     ['@deepseek-ai/dsh-session', SessionStore],
     ['@deepseek-ai/dsh-session-persistence-jsonl', JsonlSessionPersistence],
     ['@deepseek-ai/dsh-session-projection', SessionProjectionRegistry],
@@ -93,7 +100,7 @@ async function loadComposition(): Promise<{ ctx: Context; session: Session }> {
 }
 
 describe('session-cost through a real Loader composition', () => {
-  it('prices a logged request into the projection and the ledger rollup', async () => {
+  it('prices a logged request into the projection and the background-reconciled ledger rollup', async () => {
     const { ctx, session } = await loadComposition()
     // Events are wall-clock stamped by Session.append; the rate card in force
     // depends on the current date, so the assertions pin structure, not the
@@ -117,14 +124,17 @@ describe('session-cost through a real Loader composition', () => {
     expect(projection?.models['deepseek-v4-flash']?.requests).toBe(1)
     expect(Object.keys(projection?.versions ?? {})).toHaveLength(1)
 
-    // Make the log durable, then reconcile the ledger over the query corpus.
+    // Make the log durable, then wait for a background reconcile tick (the
+    // row's reconcileIntervalMs is 1000) to fold the corpus into the ledger.
     ctx.emit('session/flush', session)
     const cost = ctx.get('cost') as SessionCostService
-    const value = await cost.dashboard({})
-    expect(value.pricedRequests).toBe(1)
-    expect(value.totalCost).toBeGreaterThan(0)
-    expect(value.models['deepseek-v4-flash']?.requests).toBe(1)
-    expect(Object.keys(value.groups)).toHaveLength(1)
-    expect(Object.keys(value.versions)).toHaveLength(1)
+    await vi.waitFor(async () => {
+      const value = await cost.dashboard({})
+      expect(value.pricedRequests).toBe(1)
+      expect(value.totalCost).toBeGreaterThan(0)
+      expect(value.models['deepseek-v4-flash']?.requests).toBe(1)
+      expect(Object.keys(value.groups)).toHaveLength(1)
+      expect(Object.keys(value.versions)).toHaveLength(1)
+    }, { timeout: 8_000, interval: 100 })
   })
 })

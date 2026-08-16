@@ -1,6 +1,8 @@
 # The dsh-session-cost bundle: mounts the session-cost ledger service and the
 # ui-session-cost surfaces. Applied over a profile whose base already provides
-# storage, session persistence, and session-query (dsh-base does).
+# storage, session persistence, session-query, and the timer service (dsh-base
+# does — its timer row mounts @deepseek-ai/cordis-plugin-timer, which the
+# ledger's background reconcile requires).
 - insert:
     - id: session-cost
       name: '@logan-luo/dsh-session-cost'

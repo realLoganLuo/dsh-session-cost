@@ -45,15 +45,15 @@ dsh --profile <name> web
 
 Per conversation you get a cost strip under the composer and a cost view tab next to Chat; the sidebar footer holds the usage dashboard trigger (grouped by project / time range / model / day-week-month).
 
-> The bundle targets profiles that do not already mount the rows (a headless or custom profile). The shipped web-app-based profile already composes `session-cost` and `ui-session-cost`, so installing the bundle over it duplicates the rows and the Loader rejects the composed config.
+> The bundle targets profiles that do not already mount the rows (a headless or custom profile) but whose base provides the platform services it needs — storage, session persistence, session-query, and the timer service (`@deepseek-ai/cordis-plugin-timer`, which the ledger's background reconcile requires; `dsh-base` mounts all of them). The shipped web-app-based profile already composes `session-cost` and `ui-session-cost`, so installing the bundle over it duplicates the rows and the Loader rejects the composed config.
 
 ## Configuration
 
-The defaults work out of the box — no configuration is required. The only tunable is the ledger reconcile throttle on the `session-cost` row:
+The defaults work out of the box — no configuration is required. The only tunable is the background ledger reconcile period on the `session-cost` row:
 
 | Option | Default | Meaning |
 | --- | --- | --- |
-| `reconcileIntervalMs` | `5000` | Dashboard calls reconcile the ledger at most this often (ms). Fresh live events still reach the browser instantly through the projection channel. |
+| `reconcileIntervalMs` | `5000` | How often the ledger service folds new session log events into the durable ledger in the background (a warm-up pass runs at startup). Dashboard calls read the latest successfully reconciled ledger and never trigger a scan themselves; normal freshness is about one period plus one scan. A transient scan failure keeps showing the previous data and retries on the next tick. |
 
 To override it, add a row with the **same `id`** in your profile's own patch layer (`$DSH_HOME/profiles/<name>/cordis.patch.yml`, applied after every bundle layer, so your row wins):
 
@@ -98,8 +98,8 @@ The bundle's dependency packages resolve from the npm registry, so a git-install
 
 - **Pricing**: the official DeepSeek CNY rate card with effective dates and Beijing peak windows (09:00–12:00 and 14:00–18:00). Different periods bill at different rates; the billing instant is the request step start (falling back to the message time), and unpriced requests are counted but excluded from model buckets.
 - **Projection**: a live `costStats` session projection on `ctx.sessionProjections`, pushed as `session/projection` frames as requests are priced.
-- **Ledger**: a durable `session_cost` storage domain reconciled against `ctx.sessionQuery`; per-session rows are refolded incrementally by sequence watermark, reused session ids are detected via their durable `createdAt`, and stale rows are pruned.
-- **Dashboard Remote**: `cost.dashboard` rolls the ledger up by project, time range, model, and day / week / month grouping.
+- **Ledger**: a durable `session_cost` storage domain reconciled against `ctx.sessionQuery` in the background — a warm-up pass at startup, then one incremental pass per `reconcileIntervalMs`; per-session rows are refolded by sequence watermark, reused session ids are detected via their durable `createdAt`, and stale rows are pruned.
+- **Dashboard Remote**: `cost.dashboard` is a pure read that rolls the latest reconciled ledger up by project, time range, model, and day / week / month grouping — opening and switching filters never waits for a corpus scan.
 - **UI**: a dock cost strip per conversation, a per-session cost view tab, and a sidebar usage dashboard with a project filter.
 
 ## Development

@@ -91,11 +91,15 @@ export const DashboardTrigger = memo(function DashboardTrigger(props: CostDashbo
               </button>
             </div>
             <div className={css.body}>
-              {dashboard.status === 'loading' && <div className={css.state}>{t('dashboard.loading')}</div>}
-              {dashboard.status === 'error' && <div className={css.state}>{t('dashboard.error')}</div>}
-              {dashboard.status === 'ready' && value !== undefined && (
-                <Dashboard value={value} groupBy={dashboard.selection.groupBy} t={t} />
-              )}
+              {/* A cached rollup stays on screen while revalidating: only a
+                  selection with no value yet shows the full loading/error state. */}
+              {value !== undefined
+                ? <Dashboard value={value} groupBy={dashboard.selection.groupBy} t={t} />
+                : dashboard.status === 'loading'
+                  ? <div className={css.state}>{t('dashboard.loading')}</div>
+                  : dashboard.status === 'error'
+                    ? <div className={css.state}>{t('dashboard.error')}</div>
+                    : null}
             </div>
           </div>
         </div>

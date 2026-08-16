@@ -45,15 +45,15 @@ dsh --profile <name> web
 
 每个会话的输入框下方会显示成本条，Chat 旁边有成本视图标签页；侧边栏底部是用量看板入口（按项目 / 时间段 / 模型 / 日·周·月分组）。
 
-> 组合包面向**尚未挂载这两行的 profile**（headless 或自定义 profile）。自带 web-app profile 已组合 `session-cost` 与 `ui-session-cost`，在其上安装组合包会产生重复行，Loader 会拒绝该组合配置。
+> 组合包面向**尚未挂载这两行的 profile**（headless 或自定义 profile），但其基础需提供平台服务：存储、会话持久化、会话查询，以及 timer 服务（`@deepseek-ai/cordis-plugin-timer`，账本后台对账需要它；`dsh-base` 全部提供）。自带 web-app profile 已组合 `session-cost` 与 `ui-session-cost`，在其上安装组合包会产生重复行，Loader 会拒绝该组合配置。
 
 ## 配置
 
-默认值开箱即用，无需任何配置。唯一可调参数是 `session-cost` 行的账本对账节流：
+默认值开箱即用，无需任何配置。唯一可调参数是 `session-cost` 行的后台账本对账周期：
 
 | 选项 | 默认值 | 含义 |
 | --- | --- | --- |
-| `reconcileIntervalMs` | `5000` | 看板调用最多每隔这么久（毫秒）对账一次账本。实时事件仍通过投影通道即时到达浏览器，不受此值影响。 |
+| `reconcileIntervalMs` | `5000` | 账本服务每隔这么久（毫秒）在后台把新的会话日志事件折入持久化账本（启动时先跑一轮预热）。看板调用读取最近一次成功对账的账本，本身从不触发扫描；正常新鲜度约为一个周期加一轮扫描耗时。偶发的扫描失败会继续展示旧数据，并在下一个周期自动重试。 |
 
 覆盖它：在 profile 自己的补丁层（`$DSH_HOME/profiles/<name>/cordis.patch.yml`，在所有组合包层之后应用，因此你的行生效）添加**相同 `id`** 的行：
 
@@ -98,8 +98,8 @@ dsh plugin --profile <name> add 'github:realLoganLuo/dsh-session-cost#<sha>&path
 
 - **计价**：带生效日期与北京高峰时段（09:00–12:00 与 14:00–18:00）的官方 DeepSeek 人民币费率卡。不同时段按不同费率计费；计费时点为请求 step 开始（回退到消息时间）；未计价请求会计数但不进入模型分桶。
 - **投影**：基于 `ctx.sessionProjections` 的实时 `costStats` 会话投影，随请求计价以 `session/projection` 帧推送。
-- **账本**：与 `ctx.sessionQuery` 对账的持久化 `session_cost` 存储域；按序列水位增量重折会话行，通过持久化 `createdAt` 识别被复用的会话 id，并清理过期行。
-- **Dashboard Remote**：`cost.dashboard` 按项目、时间段、模型与日 / 周 / 月分组聚合账本。
+- **账本**：与 `ctx.sessionQuery` 对账的持久化 `session_cost` 存储域——启动时先跑一轮预热，之后每个 `reconcileIntervalMs` 增量对账一轮；按序列水位增量重折会话行，通过持久化 `createdAt` 识别被复用的会话 id，并清理过期行。
+- **Dashboard Remote**：`cost.dashboard` 是纯读操作，把最近一次成功对账的账本按项目、时间段、模型与日 / 周 / 月分组聚合——打开看板或切换筛选从不等待语料扫描。
 - **UI**：每个会话的 dock 成本条、逐会话成本视图标签页，以及带项目过滤器的侧边栏用量看板。
 
 ## 开发

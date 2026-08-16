@@ -37,12 +37,12 @@ function remoteOf(overrides: Partial<CostDashboardRemote> = {}): CostDashboardRe
   }
 }
 
-function Wrapper({ remote }: { remote: CostDashboardRemote }): React.JSX.Element {
+function Wrapper({ remote, refresh }: { remote: CostDashboardRemote; refresh?: () => void }): React.JSX.Element {
   const controller = useMemo(() => new DashboardController(remote), [remote])
   const props = {
     useCostDashboard: (selector: Parameters<CostDashboardTriggerProps['useCostDashboard']>[0]) =>
       useSyncExternalStore(controller.subscribe, () => selector(controller.getSnapshot())),
-    refresh: () => controller.refresh(),
+    refresh: refresh ?? (() => controller.refresh()),
     setSelection: (partial: Parameters<CostDashboardTriggerProps['setSelection']>[0]) => {
       controller.setSelection(partial)
     },
@@ -153,5 +153,76 @@ describe('DashboardTrigger', () => {
     const { container } = render(<Wrapper remote={remote} />)
     fireEvent.click(container.querySelector('button')!)
     await waitFor(() => { expect(container.textContent).toContain('No billable requests') })
+  })
+
+  it('keeps rendering the cached rollup while a refresh is in flight', async () => {
+    let resolveSecond: ((value: { ok: true; value: CostDashboardValue }) => void) | undefined
+    let calls = 0
+    const remote = remoteOf({
+      dashboard: () => {
+        calls += 1
+        if (calls === 1) return Promise.resolve({ ok: true as const, value: VALUE })
+        return new Promise<{ ok: true; value: CostDashboardValue }>((resolve) => { resolveSecond = resolve })
+      },
+    })
+    const { container } = render(<Wrapper remote={remote} />)
+    fireEvent.click(container.querySelector('button')!)
+    await waitFor(() => { expect(container.textContent).toContain('¥4.85') })
+    // A manual refresh keeps the data on screen while loading.
+    const refreshButtons = [...container.querySelectorAll('button')].filter(button => button.textContent === 'Refresh')
+    fireEvent.click(refreshButtons[0]!)
+    expect(container.textContent).toContain('¥4.85')
+    expect(container.textContent).not.toContain('Loading…')
+    resolveSecond?.({ ok: true, value: VALUE })
+    await waitFor(() => { expect(container.textContent).toContain('¥4.85') })
+  })
+
+  it('shows the full loading state when no cached rollup exists yet', async () => {
+    const remote = remoteOf({
+      dashboard: () => new Promise<{ ok: true; value: CostDashboardValue }>(() => {}),
+    })
+    const { container } = render(<Wrapper remote={remote} />)
+    fireEvent.click(container.querySelector('button')!)
+    expect(container.textContent).toContain('Session usage')
+    expect(container.textContent).toContain('Loading…')
+    expect(container.textContent).not.toContain('¥4.85')
+  })
+
+  it('renders an empty dialog body while the view is idle', async () => {
+    // A no-op refresh keeps the controller idle: the dialog body renders no
+    // state until a refresh actually starts.
+    const { container } = render(<Wrapper remote={remoteOf()} refresh={() => {}} />)
+    fireEvent.click(container.querySelector('button')!)
+    expect(container.textContent).toContain('Session usage')
+    expect(container.textContent).not.toContain('Loading…')
+    expect(container.textContent).not.toContain('Failed to load usage data')
+    expect(container.textContent).not.toContain('¥4.85')
+  })
+
+  it('keeps the last rollup on a failed refresh and still allows retrying', async () => {
+    let calls = 0
+    const remote = remoteOf({
+      dashboard: () => {
+        calls += 1
+        if (calls === 1) return Promise.resolve({ ok: true as const, value: VALUE })
+        if (calls === 2) return Promise.resolve({ ok: false as const, error: { code: 'internal' as const, message: 'boom', details: {} } })
+        return Promise.resolve({ ok: true as const, value: { ...VALUE, totalCost: 9.9 } })
+      },
+    })
+    const { container } = render(<Wrapper remote={remote} />)
+    fireEvent.click(container.querySelector('button')!)
+    await waitFor(() => { expect(container.textContent).toContain('¥4.85') })
+    // The failed refresh keeps the last rollup on screen (the error state is
+    // full-screen only when there is no value to show).
+    const refreshButtons = [...container.querySelectorAll('button')].filter(button => button.textContent === 'Refresh')
+    fireEvent.click(refreshButtons[0]!)
+    await waitFor(() => { expect(container.textContent).toContain('¥4.85') })
+    expect(container.textContent).not.toContain('Failed to load usage data')
+    // A manual retry recovers and replaces the rollup.
+    fireEvent.click(refreshButtons[0]!)
+    await waitFor(() => {
+      expect(container.textContent).toContain('¥9.9')
+      expect(container.textContent).not.toContain('Failed to load usage data')
+    })
   })
 })

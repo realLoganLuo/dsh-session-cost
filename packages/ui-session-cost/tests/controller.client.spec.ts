@@ -135,6 +135,92 @@ describe('DashboardController', () => {
     expect(controller.getSnapshot().status).toBe('ready')
   })
 
+  it('keeps the current value while refreshing the same selection', async () => {
+    let resolveRefresh: ((value: { ok: true; value: CostDashboardValue }) => void) | undefined
+    let calls = 0
+    const { remote } = fakeRemote({
+      dashboard: () => {
+        calls += 1
+        if (calls === 1) return Promise.resolve({ ok: true as const, value: VALUE })
+        return new Promise<{ ok: true; value: CostDashboardValue }>((resolve) => { resolveRefresh = resolve })
+      },
+    })
+    const controller = new DashboardController(remote)
+    await controller.refresh()
+    expect(controller.getSnapshot().status).toBe('ready')
+    const second = controller.refresh()
+    // The previous rollup stays published while the revalidate is in flight.
+    expect(controller.getSnapshot().status).toBe('loading')
+    expect(controller.getSnapshot().value).toBe(VALUE)
+    resolveRefresh?.({ ok: true, value: VALUE })
+    await second
+    expect(controller.getSnapshot().status).toBe('ready')
+  })
+
+  it('switches back to a cached selection with its value immediately', async () => {
+    let calls = 0
+    const { remote } = fakeRemote({
+      dashboard: () => {
+        calls += 1
+        return Promise.resolve({ ok: true as const, value: { ...VALUE, totalCost: calls } })
+      },
+    })
+    const controller = new DashboardController(remote)
+    await controller.refresh() // 'all'/'day' cached with cost 1
+    controller.setSelection({ groupBy: 'model' }) // miss
+    await vi.waitFor(() => { expect(controller.getSnapshot().status).toBe('ready') })
+    expect(controller.getSnapshot().value?.totalCost).toBe(2)
+    // Cache hit: the cached rollup and next selection publish synchronously.
+    controller.setSelection({ groupBy: 'day' })
+    expect(controller.getSnapshot().value?.totalCost).toBe(1)
+    expect(controller.getSnapshot().selection).toEqual({ project: null, range: 'all', groupBy: 'day' })
+    // The silent revalidate then replaces the cache with the fresh rollup.
+    await vi.waitFor(() => { expect(controller.getSnapshot().status).toBe('ready') })
+    expect(controller.getSnapshot().value?.totalCost).toBe(3)
+  })
+
+  it('clears the previous value when switching to an uncached selection', async () => {
+    const { remote } = fakeRemote()
+    const controller = new DashboardController(remote)
+    await controller.refresh()
+    expect(controller.getSnapshot().value).toBe(VALUE)
+    controller.setSelection({ range: 'today' }) // miss
+    // The old selection's data must not show under the new filter.
+    expect(controller.getSnapshot().status).toBe('loading')
+    expect(controller.getSnapshot().value).toBeUndefined()
+    await vi.waitFor(() => { expect(controller.getSnapshot().status).toBe('ready') })
+  })
+
+  it('keeps the last successful value after a failed refresh', async () => {
+    const { remote } = fakeRemote()
+    const controller = new DashboardController(remote)
+    await controller.refresh()
+    expect(controller.getSnapshot().status).toBe('ready')
+    remote.dashboard = () => Promise.resolve({ ok: false as const, error: { code: 'internal' as const, message: 'boom', details: {} } })
+    await controller.refresh()
+    const view = controller.getSnapshot()
+    expect(view.status).toBe('error')
+    expect(view.error).toBe('transport-failed')
+    expect(view.value).toBe(VALUE)
+  })
+
+  it('drops an in-flight response after dispose', async () => {
+    let resolveRefresh: ((value: { ok: true; value: CostDashboardValue }) => void) | undefined
+    const { remote } = fakeRemote({
+      dashboard: () => new Promise<{ ok: true; value: CostDashboardValue }>((resolve) => { resolveRefresh = resolve }),
+    })
+    const controller = new DashboardController(remote)
+    const refresh = controller.refresh()
+    controller.dispose()
+    resolveRefresh?.({ ok: true, value: VALUE })
+    await refresh
+    // The response must not repopulate the cleared cache: switching back to
+    // the same selection stays a miss instead of publishing the stale value.
+    controller.setSelection({})
+    expect(controller.getSnapshot().status).toBe('loading')
+    expect(controller.getSnapshot().value).toBeUndefined()
+  })
+
   it('stops publishing after dispose', async () => {
     const { remote } = fakeRemote()
     const controller = new DashboardController(remote)

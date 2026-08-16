@@ -10,6 +10,8 @@ import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type { KvTable } from '@deepseek-ai/dsh-storage-domain'
 // Type-only: pulls the sessionQuery Context merge (ctx.sessionQuery).
 import type {} from '@deepseek-ai/dsh-session-query'
+// Type-only: pulls the timer mixin Context merge (ctx.interval).
+import type {} from '@deepseek-ai/cordis-plugin-timer'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { reconcileLedger, rollup, type SessionQueryScanSource } from './ledger.ts'
 import { sessionCostProjectionDefinition } from './projection.ts'
@@ -19,31 +21,52 @@ import type { CostDashboardRequest, CostDashboardValue, CostRow, SessionScanMeta
 /** Deployment-varying ledger tunables. */
 export interface SessionCostConfig {
   /**
-   * Dashboard calls reconcile the ledger at most this often (ms). Fresh live
-   * events still reach the browser instantly through the projection channel.
-   * Defaults to 5000.
+   * Background ledger reconcile period (ms): the ledger service folds new
+   * session log events into the durable rows this often, starting with a
+   * warm-up pass at startup. Dashboard calls read the latest successfully
+   * reconciled ledger and never trigger a scan themselves. Defaults to 5000.
    */
   reconcileIntervalMs: number
 }
 
+/**
+ * Rows covered by a successfully written watermark — a session's committed
+ * prefix. Rows past a session's `lastSeq`, or in a session without any
+ * watermark, are the tail of a pass that failed (or skipped the session's
+ * read) before its meta write; they stay hidden until a pass actually
+ * commits them. Used for the startup snapshot and after every pass.
+ */
+function committedRows(
+  rows: KvTable<string, CostRow>,
+  meta: KvTable<string, SessionScanMeta>,
+): CostRow[] {
+  const committed: CostRow[] = []
+  for (const [, row] of rows.entries()) {
+    const watermark = meta.get(row.sessionId)
+    if (watermark !== undefined && row.seq <= watermark.lastSeq) committed.push(row)
+  }
+  return committed
+}
+
 /** Durable ledger and dashboard service over the sessionQuery corpus. */
 export class SessionCostService extends TypertRemoteService {
-  static inject = ['storageDomain', 'sessionQuery', 'sessionProjections']
+  static inject = ['storageDomain', 'sessionQuery', 'sessionProjections', 'timer']
 
   /** Loader validation for the ledger tunables. */
   static Config: s<SessionCostConfig> = s.object({
-    reconcileIntervalMs: s.number().step(1).min(1).default(5_000),
+    reconcileIntervalMs: s.number().step(1).min(1_000).default(5_000),
   })
 
   private readonly reconcileIntervalMs: number
   private rows?: KvTable<string, CostRow>
   private meta?: KvTable<string, SessionScanMeta>
-  private lastReconciledAt = 0
+  /** The last successfully reconciled ledger, published atomically per pass. */
+  private snapshot: readonly CostRow[] = []
   private inFlight: Promise<void> | null = null
 
   /**
    * @param ctx - Host context carrying the storage domain, the session query
-   * engine, and the projection registry.
+   * engine, the projection registry, and the timer mixin.
    * @param config - deployment-varying ledger tunables.
    */
   constructor(ctx: Context, config: SessionCostConfig = { reconcileIntervalMs: 5_000 }) {
@@ -51,17 +74,35 @@ export class SessionCostService extends TypertRemoteService {
     this.reconcileIntervalMs = config.reconcileIntervalMs
   }
 
-  /** Open the ledger domain and mount the projection unit. */
+  /** Open the ledger domain, mount the projection unit, and start background reconciliation. */
   protected async [Service.init](): Promise<void> {
     const domain = await this.ctx.storageDomain.open(sessionCostDomainSpec)
     this.ctx.effect(() => async () => {
+      // Let an active pass finish its writes before the domain closes: the
+      // merged promise never rejects, so a failed pass cannot break teardown.
+      await this.inFlight
       await domain.close()
     }, 'session-cost: domain close')
-    this.rows = domain.table('rows')
-    this.meta = domain.table('meta')
+    const rows = domain.table('rows')
+    this.rows = rows
+    const meta = domain.table('meta')
+    this.meta = meta
+    // Serve the durable ledger immediately — a restart or a failed warm-up
+    // must not hide rows persisted by an earlier run — but only rows covered
+    // by a successfully written watermark (see committedRows).
+    this.snapshot = committedRows(rows, meta)
     this.ctx.effect(
       () => this.ctx.sessionProjections.register(sessionCostProjectionDefinition),
       'session-cost: costStats unit',
+    )
+    // Background reconciliation: one warm-up pass now, then a tick every
+    // reconcileIntervalMs. The interval disposer is fiber-bound, so dispose or
+    // hot-reload cancels the next tick; a pass already in flight is reused,
+    // never overlapped.
+    void this.runReconcile()
+    this.ctx.effect(
+      () => this.ctx.interval(() => { void this.runReconcile() }, this.reconcileIntervalMs),
+      'session-cost: reconcile tick',
     )
   }
 
@@ -87,27 +128,44 @@ export class SessionCostService extends TypertRemoteService {
   }
 
   /**
-   * Reconcile the ledger against the sessionQuery corpus, throttled.
-   * An in-flight pass is awaited rather than restarted; a failed pass retries
-   * on the next call after the interval.
+   * Run one ledger reconciliation pass, merging with any pass already in
+   * flight. A failed pass logs a warning, keeps the last good ledger readable,
+   * and retries on the next tick; this method never rejects, so background
+   * ticks cannot produce unhandled promise rejections.
    */
-  private async reconcile(): Promise<void> {
-    const now = Date.now()
-    if (this.inFlight !== null) return this.inFlight
-    if (now - this.lastReconciledAt < this.reconcileIntervalMs) return
-    const tables = this.requireTables()
-    this.lastReconciledAt = now
-    this.inFlight = reconcileLedger(this.scanSource(), tables).then(
-      () => undefined,
-      (error: unknown) => {
-        this.lastReconciledAt = 0
-        throw error
-      },
-    )
+  private async runReconcile(): Promise<void> {
+    const running = this.inFlight
+    if (running !== null) {
+      await running
+      return
+    }
     try {
-      await this.inFlight
-    } finally {
-      this.inFlight = null
+      const tables = this.requireTables()
+      const pass = reconcileLedger(this.scanSource(), tables)
+      // The merged promise never rejects, so concurrent ticks cannot observe
+      // an unhandled rejection; the owner below awaits the raw pass to tell a
+      // completed pass from a failed one.
+      this.inFlight = pass.then(
+        () => undefined,
+        () => undefined,
+      )
+      try {
+        await pass
+        // Only a completed pass publishes a new snapshot: a dashboard read
+        // during a scan keeps seeing the previous consistent ledger instead
+        // of a partially folded one, and a failed pass keeps it too. The
+        // watermark filter still applies — a pass that contained an
+        // unreadable session must not republish that session's uncovered
+        // rows from an earlier failed pass.
+        this.snapshot = committedRows(tables.rows, tables.meta)
+      } catch (error: unknown) {
+        console.warn('[session-cost] background ledger reconcile failed:', error)
+      } finally {
+        this.inFlight = null
+      }
+      /* v8 ignore next 3 -- unreachable: requireTables only throws before init, and no pass runs then */
+    } catch (error: unknown) {
+      console.warn('[session-cost] background ledger reconcile failed:', error)
     }
   }
 
@@ -122,16 +180,18 @@ export class SessionCostService extends TypertRemoteService {
   }
 
   /**
-   * One dashboard rollup over the reconciled ledger.
+   * One dashboard rollup over the latest successfully reconciled ledger
+   * snapshot. Pure read: the background reconcile owns scanning, so this
+   * never waits on or triggers a sessionQuery pass, and a scan in progress
+   * cannot leak a partially folded ledger.
    * @param request - selection and grouping; defaults to everything grouped by day.
    * @returns the rollup value.
    */
   @Remote('dashboard')
   async dashboard(request: CostDashboardRequest): Promise<CostDashboardValue> {
-    await this.reconcile()
-    const { rows } = this.requireTables()
+    this.requireTables()
     return rollup(
-      [...rows.entries()].map(([, row]) => row),
+      this.snapshot,
       {
         ...request.project !== undefined && { project: request.project },
         ...request.from !== undefined && { from: request.from },
