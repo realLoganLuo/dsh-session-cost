@@ -1,8 +1,8 @@
 /** Client-side label helpers: pure functions over cost/pricing vocabulary. */
 
 import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
-import { formatYuan } from '@logan-luo/dsh-session-cost/src/pricing.ts'
-import type { DeepSeekPricingModel, PricedSelection } from '@logan-luo/dsh-session-cost/src/pricing.ts'
+import { formatYuan } from '@logan-luo/dsh-session-cost/pricing'
+import type { DeepSeekPricingModel, PricedSelection } from '@logan-luo/dsh-session-cost/pricing'
 import type { ModelCostBucket } from '@logan-luo/dsh-session-cost/types'
 import type { CostKey } from './locales.ts'
 

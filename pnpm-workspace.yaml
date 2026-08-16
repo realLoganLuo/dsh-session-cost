@@ -1,2 +1,6 @@
 packages:
   - packages/*
+# The published packages use plain semver ranges (never `workspace:`), so npm
+# can install them from git; this setting keeps the monorepo linked to the
+# workspace copies while the ranges match the local versions.
+linkWorkspacePackages: true

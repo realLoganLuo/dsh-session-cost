@@ -23,17 +23,76 @@ dsh --help
 
 ## 安装
 
+**第一步 — 把组合包装进 profile**（安装组合包及其两个依赖包；组合包的补丁会插入 `session-cost` node 服务与 `ui-session-cost` 浏览器界面两行）：
+
 ```sh
 dsh plugin --profile <name> add @logan-luo/dsh-session-cost-bundle
 ```
 
-`dsh plugin` 会在 profile 目录里转发给 pnpm：安装组合包及其两个依赖包，组合包的补丁会插入 `session-cost`（node 服务）与 `ui-session-cost`（浏览器界面）两行。用以下命令核对装配结果：
+**第二步 — 核对两行是否挂载：**
 
 ```sh
 dsh --profile <name> --dump-config
 ```
 
-组合包面向**尚未挂载这两行的 profile**（headless 或自定义 profile）。自带 web-app profile 已组合 `session-cost` 与 `ui-session-cost`，在其上安装组合包会产生重复行，Loader 会拒绝该组合配置。
+输出中应能看到 `session-cost` 与 `ui-session-cost` 两行。
+
+**第三步 — 启动 profile 并打开 http://127.0.0.1:3080：**
+
+```sh
+dsh --profile <name> web
+```
+
+每个会话的输入框下方会显示成本条，Chat 旁边有成本视图标签页；侧边栏底部是用量看板入口（按项目 / 时间段 / 模型 / 日·周·月分组）。
+
+> 组合包面向**尚未挂载这两行的 profile**（headless 或自定义 profile）。自带 web-app profile 已组合 `session-cost` 与 `ui-session-cost`，在其上安装组合包会产生重复行，Loader 会拒绝该组合配置。
+
+## 配置
+
+默认值开箱即用，无需任何配置。唯一可调参数是 `session-cost` 行的账本对账节流：
+
+| 选项 | 默认值 | 含义 |
+| --- | --- | --- |
+| `reconcileIntervalMs` | `5000` | 看板调用最多每隔这么久（毫秒）对账一次账本。实时事件仍通过投影通道即时到达浏览器，不受此值影响。 |
+
+覆盖它：在 profile 自己的补丁层（`$DSH_HOME/profiles/<name>/cordis.patch.yml`，在所有组合包层之后应用，因此你的行生效）添加**相同 `id`** 的行：
+
+```yaml
+# $DSH_HOME/profiles/<name>/cordis.patch.yml
+- id: session-cost
+  name: '@logan-luo/dsh-session-cost'
+  config:
+    reconcileIntervalMs: 10000
+```
+
+两点须知：
+
+- 补丁行会**整体替换**目标行的 config，而不是逐键深合并——如果未来版本新增配置项，想保留的键都要重述。
+- 配置变更会热重载该行（插件经由 `ctx.effect` 注册的副作用会随卸载/重载自动清理），无需重启。
+
+## 从 GitHub 安装（进阶）
+
+组合包也可以直接从 GitHub 安装；pnpm 会拉取仓库，每个被安装包的 `prepare` 脚本会从源码构建自己的 `lib/`（自包含：只依赖该包自己的 devDependencies，不需要 monorepo 检出环境）：
+
+```sh
+dsh plugin --profile <name> add 'github:realLoganLuo/dsh-session-cost#<sha>&path:/packages/session-cost-bundle'
+```
+
+两点须知：
+
+- 请锁定 commit（`#<sha>`），防止后续推送悄悄改变实际运行的内容；只对源码可信的包这样做——`prepare` 会在你的机器上、任何沙箱之外执行该包的代码。
+- pnpm ≥ 10 在显式允许之前拒绝运行 git 依赖的 `prepare`。第一次 `add` 会失败并打印需要复制到该 profile `pnpm-workspace.yaml` 的确切 `allowBuilds` 键：
+
+  ```yaml
+  allowBuilds:
+    '@logan-luo/dsh-session-cost-bundle': true
+    '@logan-luo/dsh-session-cost': true
+    '@logan-luo/dsh-client-ui-session-cost': true
+  ```
+
+  然后重新执行 `add`。
+
+组合包的依赖包从 npm 注册表解析，因此 git 安装的组合包应指向版本与已发布 `0.1.0-rc.6` 一致的 commit（或者用各自的 `path:` 说明符从 git 分别安装三个包）。
 
 ## 功能一览
 
@@ -60,7 +119,7 @@ pnpm run lint       # oxlint
 
 ## 发布
 
-组合包是标准形式的 Cordis 插件：每个包带 `prepare` 脚本（`tsc -b` + tsdown）以支持 git 安装，`pnpm publish` 会重写内部 `workspace:` 依赖。`npm login` 后按包或经组合包发布。
+组合包是标准形式的 Cordis 插件：每个包的 `prepare` 脚本用该包自己的 devDependencies 构建对应端（node 半区与组合包为 host，界面包为 client）——`tsc -b` 加 tsdown，含 Typert 生成——因此 `pnpm publish` 构建与 git 安装都能产出 `lib/`。`npm login` 后按包或经组合包发布。
 
 ## 许可
 

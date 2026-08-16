@@ -34,6 +34,10 @@
       "types": "./lib/typert.remote-client.d.ts",
       "default": "./lib/typert.remote-client.js"
     },
+    "./pricing": {
+      "types": "./lib/types/pricing.d.ts",
+      "default": "./lib/types/pricing.js"
+    },
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
@@ -73,7 +77,11 @@
     "@deepseek-ai/dsh-storage-domain": ">=0.1.0-rc.5 <0.2.0-0",
     "@deepseek-ai/dsh-storage-json": ">=0.1.0-rc.5 <0.2.0-0",
     "@deepseek-ai/dsh-typert-protocol": ">=0.1.0-rc.5 <0.2.0-0",
+    "@deepseek-ai/dsh-typert-generator": ">=0.1.0-rc.6 <0.2.0-0",
     "typescript": "^5.5.0",
+    "tsdown": "0.22.2",
+    "lightningcss": "^1.29.2",
+    "@types/node": "^22.20.0",
     "@deepseek-ai/cordis-plugin-include": ">=1.0.6-rc.0 <2.0.0-0",
     "@deepseek-ai/cordis-plugin-loader": ">=1.0.2-rc.0 <2.0.0-0",
     "@deepseek-ai/dsh-session-persistence-jsonl": ">=0.1.0-rc.5 <0.2.0-0",
